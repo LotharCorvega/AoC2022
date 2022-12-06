@@ -21,7 +21,7 @@ public class second {
 		int current = 0;
 
 		for (int i = 0; i < input.size(); i++) {
-			if (input.get(i).equals("")) {
+			if (input.get(i).isEmpty()) {
 				if (current > max1) {
 					max3 = max2;
 					max2 = max1;

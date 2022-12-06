@@ -13,6 +13,8 @@ public class second {
 		while (scanner.hasNextLine()) {
 			input.add(scanner.nextLine());
 		}
+		
+		scanner.close();
 
 		int prioritySum = 0;
 

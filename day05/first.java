@@ -18,6 +18,8 @@ public class first {
 
 		ArrayList<LinkedList<Character>> crates = readCrates(scanner);
 		ArrayList<Instruction> instructions = readInstructions(scanner);
+		
+		scanner.close();
 
 		for (Instruction a : instructions) {
 			LinkedList<Character> moved = new LinkedList<>();

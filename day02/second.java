@@ -14,6 +14,8 @@ public class second {
 			input.add(scanner.nextLine());
 		}
 		
+		scanner.close();
+		
 		int score = 0;
 		
 		for (String line : input) {			

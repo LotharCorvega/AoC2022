@@ -13,6 +13,8 @@ public class second {
 		while (scanner.hasNextLine()) {
 			input.add(scanner.nextLine());
 		}
+		
+		scanner.close();
 
 		int max1 = 0;
 		int max2 = 0;

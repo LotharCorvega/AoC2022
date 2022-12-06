@@ -14,6 +14,8 @@ public class first {
 			input.add(scanner.nextLine());
 		}
 
+		scanner.close();
+		
 		int prioritySum = 0;
 
 		for (String rucksack : input) {

@@ -22,6 +22,8 @@ public class second {
 			input.add(nums);
 		}
 		
+		scanner.close();
+		
 		int count = 0;;
 		
 		for (int [] range : input) {

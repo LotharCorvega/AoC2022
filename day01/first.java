@@ -13,6 +13,8 @@ public class first {
 		while (scanner.hasNextLine()) {
 			input.add(scanner.nextLine());
 		}
+		
+		scanner.close();
 
 		int max = 0;
 		int current = 0;

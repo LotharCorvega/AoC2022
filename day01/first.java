@@ -18,7 +18,7 @@ public class first {
 		int current = 0;
 
 		for (int i = 0; i < input.size(); i++) {
-			if (input.get(i).equals("")) {
+			if (input.get(i).isEmpty()) {
 				max = (max < current) ? current : max;
 				current = 0;
 			} else {

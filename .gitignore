@@ -1,5 +1,5 @@
-*.class
-.settings/
 template/
+.settings/
 .classpath
 .project
+*.class

@@ -6,19 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-class VariableMonkey extends Monkey {
-
-	@Override
-	public long evaluate() {
-		return 0;
-	}
-
-	@Override
-	public String toString() {
-		return "x";
-	}
-}
-
 public class second {
 	public static void main(String[] args) throws FileNotFoundException {
 		Scanner scanner = new Scanner(new File("day21/input.txt"));
@@ -41,14 +28,31 @@ public class second {
 			}
 		}
 
-		monkeys.replace("humn", new VariableMonkey());
-
 		OperationMonkey root = (OperationMonkey) monkeys.get("root");
+		Monkey leftMonkey = monkeys.get(root.leftMonkeyName);
+		Monkey rightMonkey = monkeys.get(root.rightMonkeyName);
 
-		String leftTerm = monkeys.get(root.leftMonkeyName).toString();
-		String rightTerm = monkeys.get(root.rightMonkeyName).toString();
+		BasicMonkey humnMonkey = (BasicMonkey) monkeys.get("humn");
 
-		System.out.println("Use some website for this:");
-		System.out.println(leftTerm + " = " + rightTerm);
+		// Binary search
+		long low = Long.MIN_VALUE >> 16;
+		long high = Long.MAX_VALUE >> 16;
+
+		while (low <= high) {
+			long mid = (low + high) / 2;
+			humnMonkey.value = mid;
+
+			long midVal = rightMonkey.evaluate() - leftMonkey.evaluate();
+
+			if (midVal < 0) {
+				low = mid + 1;
+			} else if (midVal > 0) {
+				high = mid - 1;
+			} else {
+				break;
+			}
+		}
+
+		System.out.println(humnMonkey.value);
 	}
 }

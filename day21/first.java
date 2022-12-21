@@ -25,11 +25,6 @@ class BasicMonkey extends Monkey {
 	public long evaluate() {
 		return value;
 	}
-
-	@Override
-	public String toString() {
-		return Long.toString(value);
-	}
 }
 
 class OperationMonkey extends Monkey {
@@ -60,22 +55,6 @@ class OperationMonkey extends Monkey {
 		default:
 			System.out.println("Error");
 			return 0;
-		}
-	}
-
-	@Override
-	public String toString() {
-		switch (type) {
-		case ADD:
-			return "(" + monkeys.get(leftMonkeyName).toString() + "+" + monkeys.get(rightMonkeyName).toString() + ")";
-		case SUBTRACT:
-			return "(" + monkeys.get(leftMonkeyName).toString() + "-" + monkeys.get(rightMonkeyName).toString() + ")";
-		case MULTIPLY:
-			return "(" + monkeys.get(leftMonkeyName).toString() + "*" + monkeys.get(rightMonkeyName).toString() + ")";
-		case DIVIDE:
-			return "(" + monkeys.get(leftMonkeyName).toString() + "/" + monkeys.get(rightMonkeyName).toString() + ")";
-		default:
-			return "Error";
 		}
 	}
 }

@@ -35,14 +35,14 @@ public class second {
 		BasicMonkey humnMonkey = (BasicMonkey) monkeys.get("humn");
 
 		// Binary search
-		long low = Long.MIN_VALUE >> 16;
-		long high = Long.MAX_VALUE >> 16;
+		double low = Long.MIN_VALUE >> 16;
+		double high = Long.MAX_VALUE >> 16;
 
 		while (low <= high) {
-			long mid = (low + high) / 2;
+			long mid = (long) (low + high) / 2;
 			humnMonkey.value = mid;
 
-			long midVal = rightMonkey.evaluate() - leftMonkey.evaluate();
+			double midVal = rightMonkey.evaluate() - leftMonkey.evaluate();
 
 			if (midVal < 0) {
 				low = mid + 1;
@@ -53,6 +53,6 @@ public class second {
 			}
 		}
 
-		System.out.println(humnMonkey.value);
+		System.out.println((long) humnMonkey.value);
 	}
 }

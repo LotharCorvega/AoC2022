@@ -11,18 +11,18 @@ enum OPTYPE {
 }
 
 abstract class Monkey {
-	public abstract long evaluate();
+	public abstract double evaluate();
 }
 
 class BasicMonkey extends Monkey {
-	long value;
+	double value;
 
-	public BasicMonkey(long value) {
+	public BasicMonkey(double value) {
 		this.value = value;
 	}
 
 	@Override
-	public long evaluate() {
+	public double evaluate() {
 		return value;
 	}
 }
@@ -42,7 +42,7 @@ class OperationMonkey extends Monkey {
 	}
 
 	@Override
-	public long evaluate() {
+	public double evaluate() {
 		switch (type) {
 		case ADD:
 			return monkeys.get(leftMonkeyName).evaluate() + monkeys.get(rightMonkeyName).evaluate();
@@ -77,10 +77,10 @@ public class first {
 			} else if (line.contains("/")) {
 				monkeys.put(arguments[0], new OperationMonkey(OPTYPE.DIVIDE, arguments[1], arguments[3], monkeys));
 			} else {
-				monkeys.put(arguments[0], new BasicMonkey(Integer.parseInt(arguments[1])));
+				monkeys.put(arguments[0], new BasicMonkey(Double.parseDouble(arguments[1])));
 			}
 		}
 
-		System.out.println(monkeys.get("root").evaluate());
+		System.out.println((long) monkeys.get("root").evaluate());
 	}
 }

@@ -140,14 +140,7 @@ public class first {
 		// Set up stack
 		Stack<State> states = new Stack<>();
 		Set<State> visitedStates = new HashSet<>();
-
-		int u = numbering.get("AA");
-		for (int v = 0; v < valveCount; v++) {
-			int minutes = dist[u][v] + 1;
-			int currentPressure = (30 - minutes) * pressure.get(v);
-
-			states.add(new State(((1 << v)), v, minutes, currentPressure));
-		}
+		states.add(new State(0, numbering.get("AA"), 0, 0));
 
 		// Run
 		while (!states.isEmpty()) {

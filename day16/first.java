@@ -80,7 +80,7 @@ public class first {
 		Map<String, Integer> numbering = new TreeMap<>();
 		ArrayList<Integer> pressure = new ArrayList<>();
 		int index = 0;
-		int goodOnes = 0;
+		int valveCount = 0;
 
 		for (String name : pressureMap.keySet()) {
 			int currentPressure = pressureMap.get(name);
@@ -89,7 +89,8 @@ public class first {
 				pressure.add(currentPressure);
 			}
 		}
-		goodOnes = index;
+		
+		valveCount = index;
 
 		for (String name : pressureMap.keySet()) {
 			if (!numbering.containsKey(name)) {
@@ -141,28 +142,27 @@ public class first {
 		Set<State> visitedStates = new HashSet<>();
 
 		int u = numbering.get("AA");
-		for (int v = 0; v < goodOnes; v++) {
+		for (int v = 0; v < valveCount; v++) {
 			int minutes = dist[u][v] + 1;
 			int currentPressure = (30 - minutes) * pressure.get(v);
 
-			states.add(new State((0 | (1 << v)), v, minutes, currentPressure));
+			states.add(new State(((1 << v)), v, minutes, currentPressure));
 		}
 
 		// Run
 		while (!states.isEmpty()) {
 			State currentState = states.pop();
 			visitedStates.add(currentState);
-			processState(currentState, states, visitedStates, goodOnes, dist, pressure);
+			processState(currentState, states, visitedStates, valveCount, dist, pressure);
 		}
 
 		System.out.println(maxPressure);
 	}
 
-	public static void processState(State currentState, Stack<State> states, Set<State> visitedStates, int goodOnes, int[][] graph, ArrayList<Integer> pressure) {
-
+	public static void processState(State currentState, Stack<State> states, Set<State> visitedStates, int valveCount, int[][] graph, ArrayList<Integer> pressure) {
 		boolean visitedAll = true;
 
-		for (int i = 0; i < goodOnes; i++) {
+		for (int i = 0; i < valveCount; i++) {
 			if ((currentState.visitedMask & (1 << i)) == 0) {
 				State newState = new State(currentState);
 				newState.minutes += graph[newState.position][i] + 1;
@@ -170,12 +170,11 @@ public class first {
 				if (newState.minutes >= 30) {
 					maxPressure = Math.max(maxPressure, newState.pressure);
 					continue;
-				} else {
-					newState.pressure += (30 - newState.minutes) * pressure.get(i);
 				}
 
 				newState.visitedMask |= (1 << i);
 				newState.position = i;
+				newState.pressure += (30 - newState.minutes) * pressure.get(i);
 
 				if (!visitedStates.contains(newState)) {
 					states.add(newState);

@@ -4,13 +4,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.Stack;
 
 public class second {
 	static String split = "(Blueprint )|(: Each ore robot costs )|( ore. Each clay robot costs )|( ore. Each obsidian robot costs )|( ore and )|( clay. Each geode robot costs )|( ore and )|( obsidian.)";
-	static int maxGeodes;
+
+	public static int maxObsidianRobotCount;
+	public static int maxClayRobotCount;
+	public static int maxOreRobotCount;
+
+	static Blueprint currentBlueprint;
 
 	public static void main(String[] args) throws FileNotFoundException {
 		Scanner scanner = new Scanner(new File("day19/input.txt"));
@@ -29,92 +34,93 @@ public class second {
 			blueprints.add(blueprint);
 		}
 
-		int qualitySum = 0;
+		int qualitySum = 1;
 
-		for (Blueprint currentBlueprint : blueprints) {
+		for (int i = 0; i < 3; i++) {
+			currentBlueprint = blueprints.get(i);
+
 			State startState = new State(currentBlueprint);
 			startState.oreRobotCount = 1;
 
-			startState.maxOreRobotCount = Math.max(currentBlueprint.oreRobotCost.ore,
-					Math.max(currentBlueprint.clayRobotCost.ore,
-							Math.max(currentBlueprint.obsidianRobotCost.ore, currentBlueprint.geodeRobotCost.ore)));
-			startState.maxClayRobotCount = Math.max(currentBlueprint.oreRobotCost.clay,
-					Math.max(currentBlueprint.clayRobotCost.clay,
-							Math.max(currentBlueprint.obsidianRobotCost.clay, currentBlueprint.geodeRobotCost.clay)));
-			startState.maxObsidianRobotCount = Math.max(currentBlueprint.oreRobotCost.obsidian, Math.max(
-					currentBlueprint.clayRobotCost.obsidian,
-					Math.max(currentBlueprint.obsidianRobotCost.obsidian, currentBlueprint.geodeRobotCost.obsidian)));
+			maxOreRobotCount = Math.max(currentBlueprint.oreRobotCost.ore, 
+				Math.max(currentBlueprint.clayRobotCost.ore,
+				Math.max(currentBlueprint.obsidianRobotCost.ore, currentBlueprint.geodeRobotCost.ore)));
+			maxClayRobotCount = Math.max(currentBlueprint.oreRobotCost.clay,
+				Math.max(currentBlueprint.clayRobotCost.clay,
+				Math.max(currentBlueprint.obsidianRobotCost.clay, currentBlueprint.geodeRobotCost.clay)));
+			maxObsidianRobotCount = Math.max(currentBlueprint.oreRobotCost.obsidian, 
+				Math.max(currentBlueprint.clayRobotCost.obsidian,
+				Math.max(currentBlueprint.obsidianRobotCost.obsidian, currentBlueprint.geodeRobotCost.obsidian)));
 
-			Stack<State> S = new Stack<>();
-			S.add(startState);
+			Set<State> states = new HashSet<>();
+			states.add(startState);
 
-			Set<State> H = new HashSet<>();
-			H.add(startState);
+			for (int minute = 0; minute < 32; minute++) {
+				Set<State> newStates = new HashSet<>();
 
-			while (!S.isEmpty()) {
-				State currentState = S.pop();
-				processState(currentState, S, H);
-				//System.out.println(currentState);
+				for (State currentState : states) {
+					processState(currentState, newStates);
+				}
+				
+				cleanStates(newStates, 2);
+				states = newStates;
 			}
 
-			System.out.println("MaxGeodes: " + maxGeodes);
-			qualitySum += maxGeodes * currentBlueprint.ID;
-			maxGeodes = 0;
+			int maxGeodes = 0;
+
+			for (State s : states) {
+				maxGeodes = Math.max(maxGeodes, s.materials.geodes);
+			}
+			
+			qualitySum *= maxGeodes;
 		}
 
 		System.out.println(qualitySum);
 	}
-
-	public static void processState(State state, Stack<State> S, Set<State> H) {
-		if (state.time >= 24) {
-			// Update global variable
-			maxGeodes = Math.max(maxGeodes, state.materials.geodes);
-			return;
+	
+	public static void cleanStates(Set<State> states, int tolerance) {
+		int maxGeodes = 0;
+		
+		for (State s : states) {
+			maxGeodes = Math.max(maxGeodes, s.materials.geodes);
 		}
+		
+		Iterator<State> iterator = states.iterator();
+		
+		while(iterator.hasNext()) {
+			if (iterator.next().materials.geodes <= maxGeodes - tolerance) {
+				iterator.remove();
+			}
+		}
+	}
 
+	public static void processState(State state, Set<State> states) {
 		// Store newly mined materials
 		int minedOre = state.oreRobotCount;
 		int minedClay = state.clayRobotCount;
 		int minedObsidian = state.obsidianRobotCount;
 		int minedGeodes = state.geodeRobotCount;
-		
-		// Booleans for checking which robots were built
-		boolean builtOreRobot = false;
-		boolean builtClayRobot = false;
-		boolean builtObsidianRobot = false;
-		boolean builtGeodeRobot = false;
 
 		// Always build geode-robot if possible
-		if (state.materials.canAfford(state.blueprint.geodeRobotCost)) {
+		if (state.materials.canAfford(currentBlueprint.geodeRobotCost)) {
 			State newState = new State(state);
 
-			newState.time++;
+			newState.materials.subtract(currentBlueprint.geodeRobotCost);
 			newState.geodeRobotCount++;
-			newState.materials.subtract(state.blueprint.geodeRobotCost);
 
 			newState.materials.ore += minedOre;
 			newState.materials.clay += minedClay;
 			newState.materials.obsidian += minedObsidian;
 			newState.materials.geodes += minedGeodes;
 
-			newState.robotMask = 0;
-
-			if (!H.contains(newState)) {
-				S.add(newState);
-				H.add(newState);
-				
-				builtGeodeRobot = true;
-			}
-
+			states.add(newState);
 		}
 
 		// Obsidian-robot
-		if (state.obsidianRobotCount < state.maxObsidianRobotCount
-				&& state.materials.canAfford(state.blueprint.obsidianRobotCost)) {
+		if (state.obsidianRobotCount < maxObsidianRobotCount && state.materials.canAfford(currentBlueprint.obsidianRobotCost)) {
 			State newState = new State(state);
 
-			newState.time++;
-			newState.materials.subtract(state.blueprint.obsidianRobotCost);
+			newState.materials.subtract(currentBlueprint.obsidianRobotCost);
 			newState.obsidianRobotCount++;
 
 			newState.materials.ore += minedOre;
@@ -122,21 +128,14 @@ public class second {
 			newState.materials.obsidian += minedObsidian;
 			newState.materials.geodes += minedGeodes;
 
-			if (!H.contains(newState)) {
-				S.add(newState);
-				H.add(newState);
-
-				builtObsidianRobot = true;
-			}
-
+			states.add(newState);
 		}
+
 		// Clay-robot
-		if (state.clayRobotCount < state.maxClayRobotCount
-				&& state.materials.canAfford(state.blueprint.clayRobotCost)) {
+		if (state.clayRobotCount < maxClayRobotCount && state.materials.canAfford(currentBlueprint.clayRobotCost)) {
 			State newState = new State(state);
 
-			newState.time++;
-			newState.materials.subtract(state.blueprint.clayRobotCost);
+			newState.materials.subtract(currentBlueprint.clayRobotCost);
 			newState.clayRobotCount++;
 
 			newState.materials.ore += minedOre;
@@ -144,21 +143,14 @@ public class second {
 			newState.materials.obsidian += minedObsidian;
 			newState.materials.geodes += minedGeodes;
 
-			if (!H.contains(newState)) {
-				S.add(newState);
-				H.add(newState);
-
-				builtClayRobot = true;
-			}
-
+			states.add(newState);
 		}
 
 		// Ore-robot
-		if (state.oreRobotCount < state.maxOreRobotCount && state.materials.canAfford(state.blueprint.oreRobotCost)) {
+		if (state.oreRobotCount < maxOreRobotCount && state.materials.canAfford(currentBlueprint.oreRobotCost)) {
 			State newState = new State(state);
 
-			newState.time++;
-			newState.materials.subtract(state.blueprint.oreRobotCost);
+			newState.materials.subtract(currentBlueprint.oreRobotCost);
 			newState.oreRobotCount++;
 
 			newState.materials.ore += minedOre;
@@ -166,31 +158,17 @@ public class second {
 			newState.materials.obsidian += minedObsidian;
 			newState.materials.geodes += minedGeodes;
 
-			if (!H.contains(newState)) {
-				S.add(newState);
-				H.add(newState);
-
-				builtOreRobot = true;
-			}
-
+			states.add(newState);
 		}
 
 		// No-robot
-		if (true) {
-			State newState = new State(state);
+		{
+			state.materials.ore += minedOre;
+			state.materials.clay += minedClay;
+			state.materials.obsidian += minedObsidian;
+			state.materials.geodes += minedGeodes;
 
-			newState.time++;
-
-			newState.materials.ore += minedOre;
-			newState.materials.clay += minedClay;
-			newState.materials.obsidian += minedObsidian;
-			newState.materials.geodes += minedGeodes;
-
-			if (!H.contains(newState)) {
-				S.add(newState);
-				H.add(newState);
-			}
+			states.add(state);
 		}
-
 	}
 }

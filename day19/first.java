@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Set;
 
@@ -75,9 +76,6 @@ class Blueprint {
 }
 
 class State {
-	// Elapsed time
-	int time;
-
 	// Materials present
 	Materials materials;
 
@@ -92,8 +90,6 @@ class State {
 	}
 
 	public State(State state) {
-		this.time = state.time;
-
 		this.materials = new Materials(state.materials);
 
 		this.oreRobotCount = state.oreRobotCount;
@@ -106,8 +102,7 @@ class State {
 	public boolean equals(Object o) {
 		State s = (State) o;
 
-		return this.materials.equals(s.materials) 
-			&& this.time == s.time 
+		return this.materials.equals(s.materials)
 			&& this.oreRobotCount == s.oreRobotCount
 			&& this.clayRobotCount == s.clayRobotCount 
 			&& this.obsidianRobotCount == s.obsidianRobotCount
@@ -119,7 +114,6 @@ class State {
 		int hash = 7;
 
 		hash = 31 * hash + materials.hashCode();
-		hash = 31 * hash + time;
 		hash = 31 * hash + oreRobotCount;
 		hash = 31 * hash + clayRobotCount;
 		hash = 31 * hash + obsidianRobotCount;
@@ -183,6 +177,7 @@ public class first {
 					processState(currentState, newStates);
 				}
 
+				cleanStates(newStates, 2);
 				states = newStates;
 			}
 
@@ -191,12 +186,27 @@ public class first {
 			for (State s : states) {
 				maxGeodes = Math.max(maxGeodes, s.materials.geodes);
 			}
-
-			System.out.println("Blueprint " + currentBlueprint.ID + ": " + maxGeodes + " geodes");
+			
 			qualitySum += maxGeodes * currentBlueprint.ID;
 		}
 
 		System.out.println(qualitySum);
+	}
+	
+	public static void cleanStates(Set<State> states, int tolerance) {
+		int maxGeodes = 0;
+		
+		for (State s : states) {
+			maxGeodes = Math.max(maxGeodes, s.materials.geodes);
+		}
+		
+		Iterator<State> iterator = states.iterator();
+		
+		while(iterator.hasNext()) {
+			if (iterator.next().materials.geodes <= maxGeodes - tolerance) {
+				iterator.remove();
+			}
+		}
 	}
 
 	public static void processState(State state, Set<State> states) {
@@ -212,7 +222,6 @@ public class first {
 
 			newState.materials.subtract(currentBlueprint.geodeRobotCost);
 			newState.geodeRobotCount++;
-			newState.time++;
 
 			newState.materials.ore += minedOre;
 			newState.materials.clay += minedClay;
@@ -228,7 +237,6 @@ public class first {
 
 			newState.materials.subtract(currentBlueprint.obsidianRobotCost);
 			newState.obsidianRobotCount++;
-			newState.time++;
 
 			newState.materials.ore += minedOre;
 			newState.materials.clay += minedClay;
@@ -244,7 +252,6 @@ public class first {
 
 			newState.materials.subtract(currentBlueprint.clayRobotCost);
 			newState.clayRobotCount++;
-			newState.time++;
 
 			newState.materials.ore += minedOre;
 			newState.materials.clay += minedClay;
@@ -260,7 +267,6 @@ public class first {
 
 			newState.materials.subtract(currentBlueprint.oreRobotCost);
 			newState.oreRobotCount++;
-			newState.time++;
 
 			newState.materials.ore += minedOre;
 			newState.materials.clay += minedClay;
@@ -272,8 +278,6 @@ public class first {
 
 		// No-robot
 		{
-			state.time++;
-
 			state.materials.ore += minedOre;
 			state.materials.clay += minedClay;
 			state.materials.obsidian += minedObsidian;
